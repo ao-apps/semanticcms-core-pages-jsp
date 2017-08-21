@@ -29,7 +29,7 @@ import com.aoindustries.validation.ValidationException;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.pages.CaptureLevel;
 import com.semanticcms.core.pages.PageNotFoundException;
-import com.semanticcms.core.pages.Pages;
+import com.semanticcms.core.pages.PageRepository;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,18 +38,18 @@ import javax.servlet.ServletContext;
 /**
  * Accesses JSP pages in the local {@link ServletContext}.
  */
-public class JspPages implements Pages {
+public class JspPageRepository implements PageRepository {
 
-	private static final String INSTANCES_SERVLET_CONTEXT_KEY = JspPages.class.getName() + ".instances";
+	private static final String INSTANCES_SERVLET_CONTEXT_KEY = JspPageRepository.class.getName() + ".instances";
 
 	/**
 	 * Gets the JSP repository for the given context and prefix.
-	 * Only one {@link JspPages} is created per unique context and prefix.
+	 * Only one {@link JspPageRepository} is created per unique context and prefix.
 	 *
 	 * @param  path  Must be a {@link Path valid path}.
 	 *               Any trailing slash "/" will be stripped.
 	 */
-	public static JspPages getInstance(ServletContext servletContext, Path path) {
+	public static JspPageRepository getInstance(ServletContext servletContext, Path path) {
 		// Strip trailing '/' to normalize
 		{
 			String pathStr = path.toString();
@@ -66,20 +66,20 @@ public class JspPages implements Pages {
 			}
 		}
 
-		Map<Path,JspPages> instances;
+		Map<Path,JspPageRepository> instances;
 		synchronized(servletContext) {
 			@SuppressWarnings("unchecked")
-			Map<Path,JspPages> map = (Map<Path,JspPages>)servletContext.getAttribute(INSTANCES_SERVLET_CONTEXT_KEY);
+			Map<Path,JspPageRepository> map = (Map<Path,JspPageRepository>)servletContext.getAttribute(INSTANCES_SERVLET_CONTEXT_KEY);
 			if(map == null) {
-				map = new HashMap<Path,JspPages>();
+				map = new HashMap<Path,JspPageRepository>();
 				servletContext.setAttribute(INSTANCES_SERVLET_CONTEXT_KEY, map);
 			}
 			instances = map;
 		}
 		synchronized(instances) {
-			JspPages repository = instances.get(path);
+			JspPageRepository repository = instances.get(path);
 			if(repository == null) {
-				repository = new JspPages(servletContext, path);
+				repository = new JspPageRepository(servletContext, path);
 				instances.put(path, repository);
 			}
 			return repository;
@@ -91,7 +91,7 @@ public class JspPages implements Pages {
 	final Path path;
 	final String prefix;
 
-	private JspPages(ServletContext servletContext, Path path) {
+	private JspPageRepository(ServletContext servletContext, Path path) {
 		this.servletContext = servletContext;
 		this.cache = ServletContextCache.getCache(servletContext);
 		this.path = path;
