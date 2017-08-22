@@ -123,6 +123,11 @@ public class JspPageRepository implements PageRepository {
 	}
 
 	@Override
+	public boolean isAvailable() {
+		return true;
+	}
+
+	@Override
 	public boolean exists(Path path) throws IOException {
 		String pathStr = path.toString();
 		String pathAdd = pathStr.endsWith("/") ? "index.jsp" : ".jsp";
