@@ -29,7 +29,7 @@ import com.aoindustries.validation.ValidationException;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.pages.CaptureLevel;
 import com.semanticcms.core.pages.PageNotFoundException;
-import com.semanticcms.core.pages.PageRepository;
+import com.semanticcms.core.pages.local.LocalPageRepository;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +38,7 @@ import javax.servlet.ServletContext;
 /**
  * Accesses JSP pages in the local {@link ServletContext}.
  */
-public class JspPageRepository implements PageRepository {
+public class JspPageRepository extends LocalPageRepository {
 
 	private static final String INSTANCES_SERVLET_CONTEXT_KEY = JspPageRepository.class.getName() + ".instances";
 
