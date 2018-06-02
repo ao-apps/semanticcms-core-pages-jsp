@@ -22,29 +22,28 @@
  */
 package com.semanticcms.core.pages.jsp;
 
-import com.aoindustries.lang.NotImplementedException;
 import com.aoindustries.net.Path;
-import com.aoindustries.servlet.ServletContextCache;
+import com.aoindustries.util.Tuple2;
 import com.aoindustries.validation.ValidationException;
-import com.semanticcms.core.model.Page;
-import com.semanticcms.core.pages.CaptureLevel;
 import com.semanticcms.core.pages.local.LocalPageRepository;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 
 /**
- * Accesses JSP pages in the local {@link ServletContext}.
+ * Accesses JSP pages, with pattern *.jsp, in the local {@link ServletContext}.
+ * Will not match *.inc.jsp.
  */
 public class JspPageRepository extends LocalPageRepository {
 
 	private static final String INSTANCES_SERVLET_CONTEXT_KEY = JspPageRepository.class.getName() + ".instances";
 
 	/**
-	 * Gets the JSP repository for the given context and prefix.
-	 * Only one {@link JspPageRepository} is created per unique context and prefix.
+	 * Gets the JSP repository for the given context and path.
+	 * Only one {@link JspPageRepository} is created per unique context and path.
 	 *
 	 * @param  path  Must be a {@link Path valid path}.
 	 *               Any trailing slash "/" will be stripped.
@@ -86,35 +85,8 @@ public class JspPageRepository extends LocalPageRepository {
 		}
 	}
 
-	final ServletContext servletContext;
-	final ServletContextCache cache;
-	final Path path;
-	final String prefix;
-
 	private JspPageRepository(ServletContext servletContext, Path path) {
-		this.servletContext = servletContext;
-		this.cache = ServletContextCache.getCache(servletContext);
-		this.path = path;
-		String pathStr = path.toString();
-		this.prefix = pathStr.equals("/") ? "" : pathStr;
-	}
-
-	public ServletContext getServletContext() {
-		return servletContext;
-	}
-
-	/**
-	 * Gets the path, without any trailing slash except for "/".
-	 */
-	public Path getPath() {
-		return path;
-	}
-
-	/**
-	 * Gets the prefix useful for direct path concatenation, which is the path itself except empty string for "/".
-	 */
-	public String getPrefix() {
-		return prefix;
+		super(servletContext, path);
 	}
 
 	@Override
@@ -123,13 +95,10 @@ public class JspPageRepository extends LocalPageRepository {
 	}
 
 	@Override
-	public boolean isAvailable() {
-		return true;
-	}
-
-	@Override
-	public Page getPage(Path path, CaptureLevel captureLevel) throws IOException {
+	protected Tuple2<String,RequestDispatcher> getRequestDispatcher(Path path) throws IOException {
 		String pathStr = path.toString();
+		// Do not match *.inc.jsp
+		if(pathStr.endsWith(".inc")) return null;
 		String pathAdd = pathStr.endsWith("/") ? "index.jsp" : ".jsp";
 		int len =
 			prefix.length()
@@ -144,7 +113,11 @@ public class JspPageRepository extends LocalPageRepository {
 		assert resourcePath.length() == len;
 		URL resource = cache.getResource(resourcePath);
 		if(resource == null) return null;
-		// TODO: How to handle redirect on non-capture
-		throw new NotImplementedException();
+		RequestDispatcher dispatcher = servletContext.getRequestDispatcher(resourcePath);
+		if(dispatcher != null) {
+			return new Tuple2<String, RequestDispatcher>(resourcePath, dispatcher);
+		} else {
+			return null;
+		}
 	}
 }
