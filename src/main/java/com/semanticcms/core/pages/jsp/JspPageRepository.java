@@ -36,6 +36,8 @@ import javax.servlet.ServletContext;
 /**
  * Accesses JSP pages, with pattern *.jsp, in the local {@link ServletContext}.
  * Will not match *.inc.jsp.
+ *
+ * TODO: Block access to *.jspx in the page's local resources, block *.properties, too.
  */
 public class JspPageRepository extends LocalPageRepository {
 
