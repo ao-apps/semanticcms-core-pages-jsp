@@ -24,7 +24,6 @@ package com.semanticcms.core.pages.jsp;
 
 import com.aoindustries.net.Path;
 import com.aoindustries.util.Tuple2;
-import com.aoindustries.validation.ValidationException;
 import com.semanticcms.core.pages.local.LocalPageRepository;
 import java.io.IOException;
 import java.net.URL;
@@ -55,15 +54,7 @@ public class JspPageRepository extends LocalPageRepository {
 		{
 			String pathStr = path.toString();
 			if(!pathStr.equals("/") && pathStr.endsWith("/")) {
-				try {
-					path = Path.valueOf(
-						pathStr.substring(0, pathStr.length() - 1)
-					);
-				} catch(ValidationException e) {
-					AssertionError ae = new AssertionError("Stripping trailing slash from path should not render it invalid");
-					ae.initCause(e);
-					throw ae;
-				}
+				path = path.prefix(pathStr.length() - 1);
 			}
 		}
 
