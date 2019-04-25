@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-pages-jsp - SemanticCMS pages produced by JSP in the local servlet container.
- * Copyright (C) 2017, 2018  AO Industries, Inc.
+ * Copyright (C) 2017, 2018, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -63,7 +63,7 @@ public class JspPageRepository extends LocalPageRepository {
 			@SuppressWarnings("unchecked")
 			Map<Path,JspPageRepository> map = (Map<Path,JspPageRepository>)servletContext.getAttribute(INSTANCES_SERVLET_CONTEXT_KEY);
 			if(map == null) {
-				map = new HashMap<Path,JspPageRepository>();
+				map = new HashMap<>();
 				servletContext.setAttribute(INSTANCES_SERVLET_CONTEXT_KEY, map);
 			}
 			instances = map;
@@ -108,7 +108,7 @@ public class JspPageRepository extends LocalPageRepository {
 		if(resource == null) return null;
 		RequestDispatcher dispatcher = servletContext.getRequestDispatcher(resourcePath);
 		if(dispatcher != null) {
-			return new Tuple2<String, RequestDispatcher>(resourcePath, dispatcher);
+			return new Tuple2<>(resourcePath, dispatcher);
 		} else {
 			return null;
 		}
