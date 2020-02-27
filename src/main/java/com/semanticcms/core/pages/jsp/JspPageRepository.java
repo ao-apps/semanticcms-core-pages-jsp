@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-pages-jsp - SemanticCMS pages produced by JSP in the local servlet container.
- * Copyright (C) 2017, 2018, 2019  AO Industries, Inc.
+ * Copyright (C) 2017, 2018, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -27,10 +27,13 @@ import com.aoindustries.util.Tuple2;
 import com.semanticcms.core.pages.local.LocalPageRepository;
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.servlet.annotation.WebListener;
 
 /**
  * Accesses JSP pages, with pattern *.jsp, in the local {@link ServletContext}.
@@ -40,7 +43,29 @@ import javax.servlet.ServletContext;
  */
 public class JspPageRepository extends LocalPageRepository {
 
-	private static final String INSTANCES_SERVLET_CONTEXT_KEY = JspPageRepository.class.getName() + ".instances";
+	@WebListener
+	public static class Initializer implements ServletContextListener {
+		@Override
+		public void contextInitialized(ServletContextEvent event) {
+			getInstances(event.getServletContext());
+		}
+		@Override
+		public void contextDestroyed(ServletContextEvent event) {
+			// Do nothing
+		}
+	}
+
+	private static final String INSTANCES_APPLICATION_ATTRIBUTE = JspPageRepository.class.getName() + ".instances";
+
+	private static ConcurrentMap<Path,JspPageRepository> getInstances(ServletContext servletContext) {
+		@SuppressWarnings("unchecked")
+		ConcurrentMap<Path,JspPageRepository> instances = (ConcurrentMap<Path,JspPageRepository>)servletContext.getAttribute(INSTANCES_APPLICATION_ATTRIBUTE);
+		if(instances == null) {
+			instances = new ConcurrentHashMap<>();
+			servletContext.setAttribute(INSTANCES_APPLICATION_ATTRIBUTE, instances);
+		}
+		return instances;
+	}
 
 	/**
 	 * Gets the JSP repository for the given context and path.
@@ -58,24 +83,14 @@ public class JspPageRepository extends LocalPageRepository {
 			}
 		}
 
-		Map<Path,JspPageRepository> instances;
-		synchronized(servletContext) {
-			@SuppressWarnings("unchecked")
-			Map<Path,JspPageRepository> map = (Map<Path,JspPageRepository>)servletContext.getAttribute(INSTANCES_SERVLET_CONTEXT_KEY);
-			if(map == null) {
-				map = new HashMap<>();
-				servletContext.setAttribute(INSTANCES_SERVLET_CONTEXT_KEY, map);
-			}
-			instances = map;
+		ConcurrentMap<Path,JspPageRepository> instances = getInstances(servletContext);
+		JspPageRepository repository = instances.get(path);
+		if(repository == null) {
+			repository = new JspPageRepository(servletContext, path);
+			JspPageRepository existing = instances.putIfAbsent(path, repository);
+			if(existing != null) repository = existing;
 		}
-		synchronized(instances) {
-			JspPageRepository repository = instances.get(path);
-			if(repository == null) {
-				repository = new JspPageRepository(servletContext, path);
-				instances.put(path, repository);
-			}
-			return repository;
-		}
+		return repository;
 	}
 
 	private JspPageRepository(ServletContext servletContext, Path path) {
