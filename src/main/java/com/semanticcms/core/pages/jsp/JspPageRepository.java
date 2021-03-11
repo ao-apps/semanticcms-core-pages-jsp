@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-pages-jsp - SemanticCMS pages produced by JSP in the local servlet container.
- * Copyright (C) 2017, 2018, 2019, 2020  AO Industries, Inc.
+ * Copyright (C) 2017, 2018, 2019, 2020, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -57,9 +57,9 @@ public class JspPageRepository extends LocalPageRepository {
 
 	private static final String INSTANCES_APPLICATION_ATTRIBUTE = JspPageRepository.class.getName() + ".instances";
 
-	private static ConcurrentMap<Path,JspPageRepository> getInstances(ServletContext servletContext) {
+	private static ConcurrentMap<Path, JspPageRepository> getInstances(ServletContext servletContext) {
 		@SuppressWarnings("unchecked")
-		ConcurrentMap<Path,JspPageRepository> instances = (ConcurrentMap<Path,JspPageRepository>)servletContext.getAttribute(INSTANCES_APPLICATION_ATTRIBUTE);
+		ConcurrentMap<Path, JspPageRepository> instances = (ConcurrentMap<Path, JspPageRepository>)servletContext.getAttribute(INSTANCES_APPLICATION_ATTRIBUTE);
 		if(instances == null) {
 			instances = new ConcurrentHashMap<>();
 			servletContext.setAttribute(INSTANCES_APPLICATION_ATTRIBUTE, instances);
@@ -83,7 +83,7 @@ public class JspPageRepository extends LocalPageRepository {
 			}
 		}
 
-		ConcurrentMap<Path,JspPageRepository> instances = getInstances(servletContext);
+		ConcurrentMap<Path, JspPageRepository> instances = getInstances(servletContext);
 		JspPageRepository repository = instances.get(path);
 		if(repository == null) {
 			repository = new JspPageRepository(servletContext, path);
@@ -103,7 +103,7 @@ public class JspPageRepository extends LocalPageRepository {
 	}
 
 	@Override
-	protected Tuple2<String,RequestDispatcher> getRequestDispatcher(Path path) throws IOException {
+	protected Tuple2<String, RequestDispatcher> getRequestDispatcher(Path path) throws IOException {
 		String pathStr = path.toString();
 		// Do not match *.inc.jsp
 		if(pathStr.endsWith(".inc")) return null;
