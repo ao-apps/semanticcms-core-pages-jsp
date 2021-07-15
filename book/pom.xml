@@ -82,6 +82,11 @@ along with semanticcms-core-pages-jsp.  If not, see <http://www.gnu.org/licenses
 		<url>https://github.com/aoindustries/semanticcms-core-pages-jsp/issues</url>
 	</issueManagement>
 
+	<ciManagement>
+		<system>GitHub Actions</system>
+		<url>https://github.com/aoindustries/semanticcms-core-pages-jsp/actions</url>
+	</ciManagement>
+
 	<repositories>
 		<!-- Repository required here, too, so can find parent -->
 		<repository>
