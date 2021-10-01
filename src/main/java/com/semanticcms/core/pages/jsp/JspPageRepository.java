@@ -24,6 +24,7 @@ package com.semanticcms.core.pages.jsp;
 
 import com.aoapps.hodgepodge.util.Tuple2;
 import com.aoapps.net.Path;
+import com.aoapps.servlet.attribute.ScopeEE;
 import com.semanticcms.core.pages.local.LocalPageRepository;
 import java.io.IOException;
 import java.net.URL;
@@ -55,16 +56,11 @@ public class JspPageRepository extends LocalPageRepository {
 		}
 	}
 
-	private static final String INSTANCES_APPLICATION_ATTRIBUTE = JspPageRepository.class.getName() + ".instances";
+	private static final ScopeEE.Application.Attribute<ConcurrentMap<Path, JspPageRepository>> INSTANCES_APPLICATION_ATTRIBUTE =
+		ScopeEE.APPLICATION.attribute(JspPageRepository.class.getName() + ".instances");
 
 	private static ConcurrentMap<Path, JspPageRepository> getInstances(ServletContext servletContext) {
-		@SuppressWarnings("unchecked")
-		ConcurrentMap<Path, JspPageRepository> instances = (ConcurrentMap<Path, JspPageRepository>)servletContext.getAttribute(INSTANCES_APPLICATION_ATTRIBUTE);
-		if(instances == null) {
-			instances = new ConcurrentHashMap<>();
-			servletContext.setAttribute(INSTANCES_APPLICATION_ATTRIBUTE, instances);
-		}
-		return instances;
+		return INSTANCES_APPLICATION_ATTRIBUTE.context(servletContext).computeIfAbsent(__ -> new ConcurrentHashMap<>());
 	}
 
 	/**
