@@ -45,84 +45,90 @@ import javax.servlet.annotation.WebListener;
  */
 public class JspPageRepository extends LocalPageRepository {
 
-	@WebListener
-	public static class Initializer implements ServletContextListener {
-		@Override
-		public void contextInitialized(ServletContextEvent event) {
-			getInstances(event.getServletContext());
-		}
-		@Override
-		public void contextDestroyed(ServletContextEvent event) {
-			// Do nothing
-		}
-	}
+  @WebListener
+  public static class Initializer implements ServletContextListener {
+    @Override
+    public void contextInitialized(ServletContextEvent event) {
+      getInstances(event.getServletContext());
+    }
+    @Override
+    public void contextDestroyed(ServletContextEvent event) {
+      // Do nothing
+    }
+  }
 
-	private static final ScopeEE.Application.Attribute<ConcurrentMap<Path, JspPageRepository>> INSTANCES_APPLICATION_ATTRIBUTE =
-		ScopeEE.APPLICATION.attribute(JspPageRepository.class.getName() + ".instances");
+  private static final ScopeEE.Application.Attribute<ConcurrentMap<Path, JspPageRepository>> INSTANCES_APPLICATION_ATTRIBUTE =
+    ScopeEE.APPLICATION.attribute(JspPageRepository.class.getName() + ".instances");
 
-	private static ConcurrentMap<Path, JspPageRepository> getInstances(ServletContext servletContext) {
-		return INSTANCES_APPLICATION_ATTRIBUTE.context(servletContext).computeIfAbsent(__ -> new ConcurrentHashMap<>());
-	}
+  private static ConcurrentMap<Path, JspPageRepository> getInstances(ServletContext servletContext) {
+    return INSTANCES_APPLICATION_ATTRIBUTE.context(servletContext).computeIfAbsent(__ -> new ConcurrentHashMap<>());
+  }
 
-	/**
-	 * Gets the JSP repository for the given context and path.
-	 * Only one {@link JspPageRepository} is created per unique context and path.
-	 *
-	 * @param  path  Must be a {@link Path valid path}.
-	 *               Any trailing slash "/" will be stripped.
-	 */
-	public static JspPageRepository getInstance(ServletContext servletContext, Path path) {
-		// Strip trailing '/' to normalize
-		{
-			String pathStr = path.toString();
-			if(!pathStr.equals("/") && pathStr.endsWith("/")) {
-				path = path.prefix(pathStr.length() - 1);
-			}
-		}
+  /**
+   * Gets the JSP repository for the given context and path.
+   * Only one {@link JspPageRepository} is created per unique context and path.
+   *
+   * @param  path  Must be a {@link Path valid path}.
+   *               Any trailing slash "/" will be stripped.
+   */
+  public static JspPageRepository getInstance(ServletContext servletContext, Path path) {
+    // Strip trailing '/' to normalize
+    {
+      String pathStr = path.toString();
+      if (!pathStr.equals("/") && pathStr.endsWith("/")) {
+        path = path.prefix(pathStr.length() - 1);
+      }
+    }
 
-		ConcurrentMap<Path, JspPageRepository> instances = getInstances(servletContext);
-		JspPageRepository repository = instances.get(path);
-		if(repository == null) {
-			repository = new JspPageRepository(servletContext, path);
-			JspPageRepository existing = instances.putIfAbsent(path, repository);
-			if(existing != null) repository = existing;
-		}
-		return repository;
-	}
+    ConcurrentMap<Path, JspPageRepository> instances = getInstances(servletContext);
+    JspPageRepository repository = instances.get(path);
+    if (repository == null) {
+      repository = new JspPageRepository(servletContext, path);
+      JspPageRepository existing = instances.putIfAbsent(path, repository);
+      if (existing != null) {
+        repository = existing;
+      }
+    }
+    return repository;
+  }
 
-	private JspPageRepository(ServletContext servletContext, Path path) {
-		super(servletContext, path);
-	}
+  private JspPageRepository(ServletContext servletContext, Path path) {
+    super(servletContext, path);
+  }
 
-	@Override
-	public String toString() {
-		return "jsp:" + prefix;
-	}
+  @Override
+  public String toString() {
+    return "jsp:" + prefix;
+  }
 
-	@Override
-	protected Tuple2<String, RequestDispatcher> getRequestDispatcher(Path path) throws IOException {
-		String pathStr = path.toString();
-		// Do not match *.inc.jsp
-		if(pathStr.endsWith(".inc")) return null;
-		String pathAdd = pathStr.endsWith("/") ? "index.jsp" : ".jsp";
-		int len =
-			prefix.length()
-			+ pathStr.length()
-			+ pathAdd.length();
-		String resourcePath =
-			new StringBuilder(len)
-			.append(prefix)
-			.append(pathStr)
-			.append(pathAdd)
-			.toString();
-		assert resourcePath.length() == len;
-		URL resource = cache.getResource(resourcePath);
-		if(resource == null) return null;
-		RequestDispatcher dispatcher = servletContext.getRequestDispatcher(resourcePath);
-		if(dispatcher != null) {
-			return new Tuple2<>(resourcePath, dispatcher);
-		} else {
-			return null;
-		}
-	}
+  @Override
+  protected Tuple2<String, RequestDispatcher> getRequestDispatcher(Path path) throws IOException {
+    String pathStr = path.toString();
+    // Do not match *.inc.jsp
+    if (pathStr.endsWith(".inc")) {
+      return null;
+    }
+    String pathAdd = pathStr.endsWith("/") ? "index.jsp" : ".jsp";
+    int len =
+      prefix.length()
+      + pathStr.length()
+      + pathAdd.length();
+    String resourcePath =
+      new StringBuilder(len)
+      .append(prefix)
+      .append(pathStr)
+      .append(pathAdd)
+      .toString();
+    assert resourcePath.length() == len;
+    URL resource = cache.getResource(resourcePath);
+    if (resource == null) {
+      return null;
+    }
+    RequestDispatcher dispatcher = servletContext.getRequestDispatcher(resourcePath);
+    if (dispatcher != null) {
+      return new Tuple2<>(resourcePath, dispatcher);
+    } else {
+      return null;
+    }
+  }
 }
