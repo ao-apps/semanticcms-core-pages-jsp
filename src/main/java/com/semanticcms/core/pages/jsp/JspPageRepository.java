@@ -76,7 +76,7 @@ public class JspPageRepository extends LocalPageRepository {
     // Strip trailing '/' to normalize
     {
       String pathStr = path.toString();
-      if (!pathStr.equals("/") && pathStr.endsWith("/")) {
+      if (!"/".equals(pathStr) && pathStr.endsWith("/")) {
         path = path.prefix(pathStr.length() - 1);
       }
     }
