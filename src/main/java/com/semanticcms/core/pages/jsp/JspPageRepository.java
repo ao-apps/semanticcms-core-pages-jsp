@@ -40,12 +40,16 @@ import javax.servlet.annotation.WebListener;
 /**
  * Accesses JSP pages, with pattern *.jsp, in the local {@link ServletContext}.
  * Will not match *.inc.jsp.
- *
+ * <p>
  * TODO: Block access to *.jspx in the page's local resources, block *.properties, too.
+ * </p>
  */
 public class JspPageRepository extends LocalPageRepository {
 
-  @WebListener
+  /**
+   * Initializes the *.jsp page repository during {@linkplain ServletContextListener application start-up}.
+   */
+  @WebListener("Initializes the *.jsp page repository during application start-up.")
   public static class Initializer implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent event) {
@@ -62,7 +66,7 @@ public class JspPageRepository extends LocalPageRepository {
       ScopeEE.APPLICATION.attribute(JspPageRepository.class.getName() + ".instances");
 
   private static ConcurrentMap<Path, JspPageRepository> getInstances(ServletContext servletContext) {
-    return INSTANCES_APPLICATION_ATTRIBUTE.context(servletContext).computeIfAbsent(__ -> new ConcurrentHashMap<>());
+    return INSTANCES_APPLICATION_ATTRIBUTE.context(servletContext).computeIfAbsent(name -> new ConcurrentHashMap<>());
   }
 
   /**
@@ -73,13 +77,13 @@ public class JspPageRepository extends LocalPageRepository {
    *               Any trailing slash "/" will be stripped.
    */
   public static JspPageRepository getInstance(ServletContext servletContext, Path path) {
-    // Strip trailing '/' to normalize
-    {
-      String pathStr = path.toString();
-      if (!"/".equals(pathStr) && pathStr.endsWith("/")) {
-        path = path.prefix(pathStr.length() - 1);
+      // Strip trailing '/' to normalize
+      {
+        String pathStr = path.toString();
+        if (!"/".equals(pathStr) && pathStr.endsWith("/")) {
+          path = path.prefix(pathStr.length() - 1);
+        }
       }
-    }
 
     ConcurrentMap<Path, JspPageRepository> instances = getInstances(servletContext);
     JspPageRepository repository = instances.get(path);
