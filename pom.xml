@@ -47,7 +47,7 @@ along with semanticcms-core-pages-jsp.  If not, see <https://www.gnu.org/license
     <sonar.coverage.exclusions>**.*</sonar.coverage.exclusions>
   </properties>
 
-  <name>SemanticCMS Core Pages JSP²</name>
+  <name>SemanticCMS Core Pages JSP</name>
   <url>https://semanticcms.com/core/pages/jsp/</url>
   <description>SemanticCMS pages produced by JSP in the local servlet container.</description>
   <inceptionYear>2017</inceptionYear>
