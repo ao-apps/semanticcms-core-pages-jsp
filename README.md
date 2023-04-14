@@ -23,7 +23,7 @@
 * [Project Home](https://semanticcms.com/core/pages/jsp/)
 * [Changelog](https://semanticcms.com/core/pages/jsp/changelog)
 * [API Docs](https://semanticcms.com/core/pages/jsp/apidocs/)
-* [Maven Central Repository](https://central.sonatype.com/search?namespace=com.semanticcms&q=a%3Asemanticcms-core-pages-jsp)
+* [Maven Central Repository](https://central.sonatype.com/artifact/com.semanticcms/semanticcms-core-pages-jsp)
 * [GitHub](https://github.com/ao-apps/semanticcms-core-pages-jsp)
 
 ## Contact Us
