@@ -36,6 +36,7 @@ along with semanticcms-core-pages-jsp.  If not, see <https://www.gnu.org/license
     <!-- Must be set to ${git.commit.time} for snapshots or ISO 8601 timestamp for releases. -->
     <project.build.outputTimestamp>${git.commit.time}</project.build.outputTimestamp>
     <module.name>com.semanticcms.core.pages.jsp.book</module.name>
+    <subproject.subpath>devel/</subproject.subpath>
     <!-- These values are copied from the project being documented -->
     <documented.artifactId>semanticcms-core-pages-jsp</documented.artifactId>
     <documented.name>SemanticCMS Core Pages JSP</documented.name>
